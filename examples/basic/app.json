@@ -14,7 +14,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "expo.modules.shareextension.basic"
+      "bundleIdentifier": "shareextension.basic.celian"
     },
     "android": {
       "adaptiveIcon": {
@@ -54,10 +54,10 @@
               "appExtensions": [
                 {
                   "targetName": "basicShareExtension",
-                  "bundleIdentifier": "expo.modules.shareextension.basic.ShareExtension",
+                  "bundleIdentifier": "expo.modules.shareextension.basic.celian.ShareExtension",
                   "entitlements": {
                     "com.apple.security.application-groups": [
-                      "group.expo.modules.shareextension.basic"
+                      "group.shareextension.basic.celian"
                     ]
                   }
                 }

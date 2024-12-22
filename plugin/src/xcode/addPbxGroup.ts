@@ -7,38 +7,64 @@ export function addPbxGroup(
   {
     targetName,
     platformProjectRoot,
-    fonts = [],
+    // fonts = [],
     googleServicesFilePath,
     preprocessingFilePath,
+    asActionExtension,
   }: {
     targetName: string;
     platformProjectRoot: string;
-    fonts: string[];
+    // fonts: string[];
     googleServicesFilePath?: string;
     preprocessingFilePath?: string;
-  }
+    asActionExtension: boolean;
+  },
 ) {
   const targetPath = path.join(platformProjectRoot, targetName);
+  const sharedResourcesPath = path.join(platformProjectRoot, "SharedResources");
 
   if (!fs.existsSync(targetPath)) {
     fs.mkdirSync(targetPath, { recursive: true });
   }
 
-  copyFileSync(
-    path.join(__dirname, "../../swift/ShareExtensionViewController.swift"),
-    targetPath,
-    "ShareExtensionViewController.swift"
-  );
-
-  for (const font of fonts) {
-    copyFileSync(font, targetPath);
+  if (!fs.existsSync(sharedResourcesPath)) {
+    fs.mkdirSync(sharedResourcesPath, { recursive: true });
   }
 
+  copyFileSync(
+    path.join(__dirname, "../../swift/ShareExtensionViewController.swift"),
+    path.join(
+      targetPath,
+      `${asActionExtension ? "Action" : "Share"}ExtensionViewController.swift`,
+    ),
+  );
+
+  //----------------------------------------------
+  // In the file replace the class name with the target name
+  // TODO the file should not be copied but shared between both extensions for consistency
+  const file = path.join(
+    targetPath,
+    `${asActionExtension ? "Action" : "Share"}ExtensionViewController.swift`,
+  );
+  const data = fs.readFileSync(file, "utf8");
+  const result = data.replace(
+    /ShareExtensionViewController/g,
+    `${targetName}ViewController`,
+  );
+  fs.writeFileSync(file, result, "utf8");
+
+  // const fontFiles = [];
+  // for (const font of fonts) {
+  //   const fontName = path.basename(font);
+  //   copyFileSync(font, sharedResourcesPath, fontName);
+  //   fontFiles.push(fontName);
+  // }
+
   const files = [
-    "ShareExtensionViewController.swift",
+    `${asActionExtension ? "Action" : "Share"}ExtensionViewController.swift`,
     "Info.plist",
     `${targetName}.entitlements`,
-    ...fonts.map((font: string) => path.basename(font)),
+    // ...fontFiles,
   ];
 
   if (googleServicesFilePath?.length) {
@@ -55,7 +81,7 @@ export function addPbxGroup(
   const { uuid: pbxGroupUuid } = xcodeProject.addPbxGroup(
     files,
     targetName,
-    targetName
+    targetName,
   );
 
   // Add PBXGroup to top level group

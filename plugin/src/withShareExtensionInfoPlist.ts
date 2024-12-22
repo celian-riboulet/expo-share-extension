@@ -23,6 +23,7 @@ export const withShareExtensionInfoPlist: ConfigPlugin<{
   height?: Height;
   preprocessingFile?: string;
   googleServicesFile?: string;
+  asActionExtension: boolean;
 }> = (
   config,
   {
@@ -32,14 +33,15 @@ export const withShareExtensionInfoPlist: ConfigPlugin<{
     height,
     preprocessingFile,
     googleServicesFile,
-  }
+    asActionExtension,
+  },
 ) => {
   return withInfoPlist(config, (config) => {
-    const targetName = getShareExtensionName(config);
+    const targetName = getShareExtensionName(config, asActionExtension);
 
     const targetPath = path.join(
       config.modRequest.platformProjectRoot,
-      targetName
+      targetName,
     );
 
     const filePath = path.join(targetPath, "Info.plist");
@@ -128,13 +130,14 @@ export const withShareExtensionInfoPlist: ConfigPlugin<{
           ...(preprocessingFile && {
             NSExtensionJavaScriptPreprocessingFile: path.basename(
               preprocessingFile,
-              path.extname(preprocessingFile)
+              path.extname(preprocessingFile),
             ),
           }),
         },
-        NSExtensionPrincipalClass:
-          "$(PRODUCT_MODULE_NAME).ShareExtensionViewController",
-        NSExtensionPointIdentifier: "com.apple.share-services",
+        NSExtensionPrincipalClass: `$(PRODUCT_MODULE_NAME).${asActionExtension ? "Action" : "Share"}ExtensionViewController`,
+        NSExtensionPointIdentifier: asActionExtension
+          ? "com.apple.ui-services"
+          : "com.apple.share-services",
       },
       ShareExtensionBackgroundColor: backgroundColor,
       ShareExtensionHeight: height,

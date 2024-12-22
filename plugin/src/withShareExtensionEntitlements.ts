@@ -9,9 +9,11 @@ import {
   getShareExtensionName,
 } from "./index";
 
-export const withShareExtensionEntitlements: ConfigPlugin = (config) => {
+export const withShareExtensionEntitlements: ConfigPlugin<{
+  asActionExtension: boolean;
+}> = (config, { asActionExtension }) => {
   return withEntitlementsPlist(config, (config) => {
-    const targetName = getShareExtensionName(config);
+    const targetName = getShareExtensionName(config, asActionExtension);
 
     const targetPath = path.join(
       config.modRequest.platformProjectRoot,

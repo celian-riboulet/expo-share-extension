@@ -7,6 +7,7 @@ export function addBuildPhases(
     groupName,
     productFile,
     resources,
+    asActionExtension,
   }: {
     targetUuid: string;
     groupName: string;
@@ -17,9 +18,10 @@ export function addBuildPhases(
       group: string;
     };
     resources: string[];
+    asActionExtension: boolean;
   },
 ) {
-  const buildPath = `"$(CONTENTS_FOLDER_PATH)/ShareExtensions"`;
+  const buildPath = `"$(CONTENTS_FOLDER_PATH)/${asActionExtension ? "ActionExtensions" : "ShareExtensions"}"`;
   const targetType = "app_extension";
 
   // Add shell script build phase "Start Packager"
@@ -38,7 +40,7 @@ export function addBuildPhases(
 
   // Sources build phase
   xcodeProject.addBuildPhase(
-    ["ShareExtensionViewController.swift"],
+    [`${asActionExtension ? "Action" : "Share"}ExtensionViewController.swift`],
     "PBXSourcesBuildPhase",
     groupName,
     targetUuid,
