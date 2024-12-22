@@ -18,25 +18,35 @@ export const withShareExtensionTarget: ConfigPlugin<{
   fonts: string[];
   googleServicesFile?: string;
   preprocessingFile?: string;
-}> = (config, { fonts = [], googleServicesFile, preprocessingFile }) => {
+  asActionExtension: boolean;
+}> = (
+  config,
+  { fonts = [], googleServicesFile, preprocessingFile, asActionExtension },
+) => {
   return withXcodeProject(config, async (config) => {
     const xcodeProject = config.modResults;
 
-    const targetName = getShareExtensionName(config);
-    const bundleIdentifier = getShareExtensionBundleIdentifier(config);
+    const targetName = getShareExtensionName(config, asActionExtension);
+    const bundleIdentifier = getShareExtensionBundleIdentifier(
+      config,
+      asActionExtension,
+    );
     const marketingVersion = config.version;
 
     const targetUuid = xcodeProject.generateUuid();
-    const groupName = "Embed Foundation Extensions";
+    const groupName = asActionExtension
+      ? "Embed Action Extensions"
+      : "Embed Share Extensions";
     const { platformProjectRoot, projectRoot } = config.modRequest;
 
     if (config.ios?.googleServicesFile && !googleServicesFile) {
       console.warn(
-        "Warning: No Google Services file specified for Share Extension"
+        "Warning: No Google Services file specified for Share Extension",
       );
     }
 
-    const resources = fonts.map((font: string) => path.basename(font));
+    // const resources = fonts.map((font: string) => path.basename(font));
+    const resources: string[] = [];
 
     const googleServicesFilePath = googleServicesFile
       ? path.resolve(projectRoot, googleServicesFile)
@@ -80,9 +90,10 @@ export const withShareExtensionTarget: ConfigPlugin<{
     addPbxGroup(xcodeProject, {
       targetName,
       platformProjectRoot,
-      fonts,
+      // fonts,
       googleServicesFilePath,
       preprocessingFilePath,
+      asActionExtension,
     });
 
     addBuildPhases(xcodeProject, {
@@ -90,6 +101,7 @@ export const withShareExtensionTarget: ConfigPlugin<{
       groupName,
       productFile,
       resources,
+      asActionExtension,
     });
 
     return config;

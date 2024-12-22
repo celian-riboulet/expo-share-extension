@@ -8,8 +8,9 @@ import { getShareExtensionName } from "./index";
 
 export const withPodfile: ConfigPlugin<{
   excludedPackages?: string[];
-}> = (config, { excludedPackages }) => {
-  const targetName = getShareExtensionName(config);
+  asActionExtension: boolean;
+}> = (config, { excludedPackages, asActionExtension }) => {
+  const targetName = getShareExtensionName(config, asActionExtension);
   return withDangerousMod(config, [
     "ios",
     (config) => {

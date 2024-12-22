@@ -19,16 +19,25 @@ export const getAppBundleIdentifier = (config: ExpoConfig) => {
   return config.ios?.bundleIdentifier;
 };
 
-export const getShareExtensionBundleIdentifier = (config: ExpoConfig) => {
-  return `${getAppBundleIdentifier(config)}.ShareExtension`;
+export const getShareExtensionBundleIdentifier = (
+  config: ExpoConfig,
+  asActionExtension: boolean,
+) => {
+  return `${getAppBundleIdentifier(config)}.${asActionExtension ? "ActionExtension" : "ShareExtension"}`;
 };
 
-export const getShareExtensionName = (config: ExpoConfig) => {
-  return `${IOSConfig.XcodeUtils.sanitizedName(config.name)}ShareExtension`;
+export const getShareExtensionName = (
+  config: ExpoConfig,
+  asActionExtension: boolean,
+) => {
+  return `${IOSConfig.XcodeUtils.sanitizedName(config.name)}${asActionExtension ? "ActionExtension" : "ShareExtension"}`;
 };
 
-export const getShareExtensionEntitlementsFileName = (config: ExpoConfig) => {
-  const name = getShareExtensionName(config);
+export const getShareExtensionEntitlementsFileName = (
+  config: ExpoConfig,
+  asActionExtension: boolean,
+) => {
+  const name = getShareExtensionName(config, asActionExtension);
   return `${name}.entitlements`;
 };
 
@@ -74,7 +83,20 @@ const withShareExtension: ConfigPlugin<{
     withExpoConfig,
     withAppEntitlements,
     withAppInfoPlist,
-    [withPodfile, { excludedPackages: props?.excludedPackages ?? [] }],
+    [
+      withPodfile,
+      {
+        excludedPackages: props?.excludedPackages ?? [],
+        asActionExtension: true,
+      },
+    ],
+    [
+      withPodfile,
+      {
+        excludedPackages: props?.excludedPackages ?? [],
+        asActionExtension: false,
+      },
+    ],
     [
       withShareExtensionInfoPlist,
       {
@@ -84,15 +106,49 @@ const withShareExtension: ConfigPlugin<{
         height: props?.height,
         preprocessingFile: props?.preprocessingFile,
         googleServicesFile: props?.googleServicesFile,
+        asActionExtension: true,
       },
     ],
-    withShareExtensionEntitlements,
+    [
+      withShareExtensionInfoPlist,
+      {
+        fonts,
+        activationRules: props?.activationRules,
+        backgroundColor: props?.backgroundColor,
+        height: props?.height,
+        preprocessingFile: props?.preprocessingFile,
+        googleServicesFile: props?.googleServicesFile,
+        asActionExtension: false,
+      },
+    ],
+    [
+      withShareExtensionEntitlements,
+      {
+        asActionExtension: true,
+      },
+    ],
+    [
+      withShareExtensionEntitlements,
+      {
+        asActionExtension: false,
+      },
+    ],
     [
       withShareExtensionTarget,
       {
         fonts,
         googleServicesFile: props?.googleServicesFile,
         preprocessingFile: props?.preprocessingFile,
+        asActionExtension: true,
+      },
+    ],
+    [
+      withShareExtensionTarget,
+      {
+        fonts,
+        googleServicesFile: props?.googleServicesFile,
+        preprocessingFile: props?.preprocessingFile,
+        asActionExtension: false,
       },
     ],
   ]);
